@@ -118,7 +118,7 @@ int main (int argc, char *const argv[]){
 //    logcollect::Pattern *pattern = p->getPattern("MAC");
 //    std::cout << "Patttern:" << (*pattern->getPattern()) << std::endl;
     
-    /*
+    
     ifstream rules(rules_file);
     if(rules.is_open()){
         while(rules.good()){
@@ -135,8 +135,7 @@ int main (int argc, char *const argv[]){
     
     parser.parseRules();
     
-    */
-    /*
+
     
     std::string input_line;
     while(std::cin) {
@@ -145,7 +144,7 @@ int main (int argc, char *const argv[]){
         parser.match("SYSLOGBASE", input_line);
     };
     
-    /*
+
      
      parser.match("SYSLOGBASE", "Aug 26 11:20:12 freebsd postfix/qmgr[1079]: A2EF2284D9: from=<www@gormlarsenzornig.com>, size=933, nrcpt=1 (queue active)");
      cout << "END" << endl;

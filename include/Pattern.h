@@ -29,7 +29,6 @@ namespace logcollect {
 		pcre_extra* expression_extra;
 		pcre* value_expression;
 		pcre_extra* value_expression_extra;
-		
 		subpattern_map subpatterns;
 		
 		
@@ -43,6 +42,6 @@ namespace logcollect {
 		bool expand(Patterns *patterns);
 		Result* match(const std::string data);
 	};
-};
+}
 
 #endif

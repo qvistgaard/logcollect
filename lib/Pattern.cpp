@@ -35,9 +35,6 @@ logcollect::Result* logcollect::Pattern::match(const std::string data){
 		int erroffset;
 		this->expression = pcre_compile(this->pattern.c_str(), 0, &error, &erroffset, NULL);
 		
-		
-		
-		
 		// Analyze expression
 		const char *error_extra;
 		int namecount, namesize;
@@ -49,13 +46,6 @@ logcollect::Result* logcollect::Pattern::match(const std::string data){
 		char *names;
 		pcre_fullinfo(this->expression, this->expression_extra, PCRE_INFO_NAMETABLE, &names);
 		
-/*
-		std::cout << "count: " << namecount << std::endl;
-		std::cout << "size: " << namesize << std::endl;
-		std::cout << "names: " << &names << std::endl;
-		std::cout << "names test: " << names[12] << std::endl;
-		std::cout << "test: " << test << std::endl;
-*/	
 
 		for (int i = 0; i < namecount; i++) {
 			
@@ -98,18 +88,10 @@ logcollect::Result* logcollect::Pattern::match(const std::string data){
 			}
 		}
 		
-		bool matches = true;
+		/*
 		int ovector2[60];
 		int pcre_match = pcre_exec(this->value_expression, this->value_expression_extra, data.c_str(), (int) data.length(), 0, 0, ovector2, 60);
-//		const char **sub2[1024];
-//		pcre_get_substring_list(data.c_str(), ovector2, 20, sub2);
-		
-//		std::cout << "Match:" << *sub2[2] << std::endl;
-		
-//		while(matches){
-//		int pcre_match = pcre_exec(this->expression, this->expression_extra, data.c_str(), (int) data.length(), 0, 0, ovector, 60);
-//			if()
-//		}
+		*/
 		
 		return r;
 	}

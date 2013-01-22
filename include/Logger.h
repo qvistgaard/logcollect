@@ -27,6 +27,6 @@ namespace logcollect {
         void _write(const std::string &level, const std::string &logline);
     };
     
-};
+}
 
 #endif

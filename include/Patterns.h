@@ -35,6 +35,6 @@ namespace logcollect {
         bool addPattern(Pattern *pattern);
 		Result* match(std::string pattern_name, std::string data);
     };
-};
+}
 
 #endif

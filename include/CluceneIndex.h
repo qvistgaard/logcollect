@@ -9,7 +9,7 @@
 #ifndef logcollectd_CluceneIndex_h
 #define logcollectd_CluceneIndex_h
 #include <string>
-#include "CLucene.h"
+#include <CLucene.h>
 #include "Result.h"
 
 
@@ -28,6 +28,6 @@ namespace logcollect {
 		~CluceneIndex();
 		void index(Result *r);
 	};
-};
+}
 
 #endif

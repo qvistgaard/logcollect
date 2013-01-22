@@ -28,6 +28,6 @@ namespace logcollect {
         void addPatterns(Patterns *patterns);
     };
 
-};
+}
 
 #endif
