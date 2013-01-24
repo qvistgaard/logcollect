@@ -5,6 +5,22 @@ cheap way if indexing and searching log files. the project is based
 on the clucene library and is primary developed using C++ and a little
 PHP.
 
+
+Dependencies
+------------
+Log collect have several dependencies
+
+- jansson (C library for creating and reading JSON)
+- Clucene (C++ implementation of apache lucene fulltext index)
+- PCRE (C Library for using perl regular expressions)
+
+
+Compiling
+---------
+To compile it just run make, if you have a ny trouble you might need to
+the include and library paths specified within the Makefile
+
+
 Indexing data
 -------------
 The logdcollectd command reads log data from standard input, 
