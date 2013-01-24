@@ -10,13 +10,17 @@
 #include "../include/Result.h"
 #include "../include/PatternFile.h"
 #include "../include/CluceneIndex.h"
+#include "../include/DateConversion.h"
 
 #define PATTERN_LENGTH 1024
 
 
 
 void usage(){
-    printf("Missing -r argument, please specify a ruleset\n");
+	printf("Usage: logcollectd -f <format> -i <index> -r <rules>\n\n");
+	printf("   -r format rule file location\n");
+	printf("   -i index location\n");
+	printf("   -f format to match data against\n\n");
 }
 
 
@@ -24,19 +28,15 @@ int main (int argc, char *const argv[]){
     int argument;
     
     bool  file_rules_flag = false;
-    char *file_rules;
+    char *file_rules = NULL;
 	
     bool  index_location_flag = false;
-    char *index_location;
+    char *index_location = NULL;
 
-    
-
-    
-
-    // char logline[PATTERN_LENGTH];
-   // logcollect::Logparser parser;
-    
-    while((argument = getopt(argc, argv, "r:i:h")) != -1){
+    bool  format_flag = false;
+    char *format = NULL;
+	
+    while((argument = getopt(argc, argv, "r:i:f:h")) != -1){
         switch(argument){
             case 'r':
                 file_rules_flag = true;
@@ -46,7 +46,10 @@ int main (int argc, char *const argv[]){
 				index_location_flag = true;
                 index_location = optarg;
                 break;
-				
+            case 'f':
+				format_flag = true;
+                format = optarg;
+                break;
             case 'h':
             case '?':
             default:
@@ -59,13 +62,20 @@ int main (int argc, char *const argv[]){
     argv += optind;
 
 
-    if(!file_rules_flag || !index_location_flag){
+    if(!file_rules_flag || !index_location_flag || !format_flag){
         usage();
         exit(1);
     }
-
+	
+	
+	// std::string timestamp = "2012-07-19T09:39:59+02:00";
+	
+	logcollect::DateConversion* converter = new logcollect::DateConversion();
+	converter->addFormat(new std::string("%FT%T%z"));
+	converter->addFormat(new std::string("%FT%T"));
+	
     
-    logcollect::Logger *logger;
+    logcollect::Logger *logger = new logcollect::Logger();
     logcollect::Patterns *p = new logcollect::Patterns(logger);
     logcollect::PatternFile *rules = new logcollect::PatternFile(logger, file_rules);
 	logcollect::CluceneIndex *index = new logcollect::CluceneIndex(index_location);
@@ -84,9 +94,9 @@ int main (int argc, char *const argv[]){
 		while(std::cin) {
 			getline(std::cin, input_line);
         
-			r = p->match("RSYSLOGBASE", input_line);
+			r = p->match(format, input_line);
 			if(r){
-				index->index(r);
+				index->index(r, converter);
 				// r->dump();
 				counter++;
 			}
@@ -99,56 +109,7 @@ int main (int argc, char *const argv[]){
 	} catch (std::string error){
 		std::cout << error << std::endl;
 	}
-		
-	
 	delete index;
-	
-/*
-	r = p->match("SYSLOGBASE", "Aug 26 11:20:12 freebsd postfix/qmgr[1079]: A2EF2284D9: from=<www@gormlarsenzornig.com>, size=933, nrcpt=1 (queue active)");
-	
-	if(r){
-		index->index(r);
-		r->dump();
-	}
-	delete r;
-	
-	
-	delete index;
-	
-//    logcollect::Pattern *pattern = p->getPattern("MAC");
-//    std::cout << "Patttern:" << (*pattern->getPattern()) << std::endl;
-    
-    
-    ifstream rules(rules_file);
-    if(rules.is_open()){
-        while(rules.good()){
-            rules.getline(logline, sizeof(logline));
-            parser.addRule(logline);
-        }
-        
-    } else {
-        printf("Could not load rules, no such file or directory\n");
-        exit(1);
-    }
-    
-    rules.close();
-    
-    parser.parseRules();
-    
-
-    
-    std::string input_line;
-    while(std::cin) {
-        getline(std::cin, input_line);
-        
-        parser.match("SYSLOGBASE", input_line);
-    };
-    
-
-     
-     parser.match("SYSLOGBASE", "Aug 26 11:20:12 freebsd postfix/qmgr[1079]: A2EF2284D9: from=<www@gormlarsenzornig.com>, size=933, nrcpt=1 (queue active)");
-     cout << "END" << endl;
-     */
     return 0;
 }
 

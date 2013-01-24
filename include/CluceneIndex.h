@@ -11,6 +11,7 @@
 #include <string>
 #include <CLucene.h>
 #include "Result.h"
+#include "DateConversion.h"
 
 
 
@@ -26,7 +27,7 @@ namespace logcollect {
 	public:
 		CluceneIndex(const std::string index);
 		~CluceneIndex();
-		void index(Result *r);
+		void index(Result *r, DateConversion* converter);
 	};
 }
 

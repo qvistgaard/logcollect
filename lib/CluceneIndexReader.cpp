@@ -23,8 +23,8 @@ logcollect::CluceneIndexReader::CluceneIndexReader(const char* index){
 
 int logcollect::CluceneIndexReader::query(json_t* json, const char* query, const char* field, int limit, int offset){
 	
-	TCHAR wquery[strlen(query)];
-	TCHAR wfield[strlen(field)];
+	TCHAR* wquery = new TCHAR[strlen(query)];
+	TCHAR* wfield = new TCHAR[strlen(field)];
 	
 
  	this->makeTCHAR(query, wquery);
@@ -61,24 +61,36 @@ int logcollect::CluceneIndexReader::query(json_t* json, const char* query, const
 
 			
 			
-			char fieldname[wcslen(tfield->name())+1];
-			char fieldvalue[wcslen(tfield->stringValue())+1];
+			char* fieldname = new char[wcslen(tfield->name())+1];
+			char* fieldvalue = new char[wcslen(tfield->stringValue())+1];
+			json_t* value;
 			
-
+			
 			this->toChar(tfield->name(), fieldname);
-			this->toChar(tfield->stringValue(), fieldvalue);
-			
-	
-
-			
-			json_t* value = json_string((char*) fieldvalue);
+			if(strcmp(fieldname, "timestamp") == 0){
+				int64_t timestamp = lucene::document::DateTools::stringToTime(tfield->stringValue());
+				timestamp = timestamp;
+				value = json_integer(timestamp / 1000);
+/*
+				this->toChar(tfield->stringValue(), fieldvalue);
+				value = json_string((char*) fieldvalue);
+*/				
+			} else {
+				this->toChar(tfield->stringValue(), fieldvalue);
+				value = json_string((char*) fieldvalue);
+			}
 			json_object_set(object, fieldname, value);
+			
+			delete[] fieldname;
+			delete[] fieldvalue;
 		}
 		json_array_append(json, object);
 
 	}
 	
-	
+	delete[] wquery;
+	delete[] wfield;
+
 	// std::cout << json_dumps(json, JSON_ENCODE_ANY);
 	return h->length();
 	

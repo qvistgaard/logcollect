@@ -51,7 +51,7 @@ logcollect::Result* logcollect::Pattern::match(const std::string data){
 			
 			int start = (i * namesize);
 			int end = start + namesize;
-			int num;
+			int num = 0;
 			std::string subpattern = "";
 			
 			for (int ni = start; ni < end; ni++) {

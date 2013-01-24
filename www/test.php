@@ -6,23 +6,27 @@
 <?php
 
 	$time_start = microtime(true);
-$query = '../bin/search -i ../var/ -q "'.$_GET['query'].'" -f logline';
+$query = '../src/search -i ../var/ -q "'.$_GET['query'].'" -f logline';
 
 
 
 $query = trim(`$query`);
 echo '<pre>';
-//echo '<pre>'.$query;
+// echo '<pre>'.$query;
+
 
 $result = json_decode($query);
 if(is_null($result)){
 	echo $query;
 }
 
+date_default_timezone_set('GMT');
+
 $sterms = explode(" ", $_GET['query']);
 foreach($sterms as &$sterm){
 	$sterm = preg_replace('/^.*?:/', '', $sterm);
 	$sterm = str_replace('+', '', $sterm);
+	$sterm = preg_quote($sterm, '/');
 }
 	//echo var_dump($query);
 
@@ -42,12 +46,16 @@ function hstring(array $terms, $string){
 ?>
 	<table>
 		<tbody>
-			<?php while(list($key, $val) = each($result)){ ?>
+			<?php while(list($key, $val) = each($result->result)){ ?>
 			<tr>
 				<td><pre><?php
 					echo hstring($sterms, $val->logline).'<br/>';
 					foreach($val as  $key => $val){
-						if($key != 'logline'){
+						if($key == 'timestamp'){
+							// strftime('%FT%T%z', $val)
+
+							echo '<small>'.$key.': <strong>'.$val.' - '.strftime('%FT%T%z', $val).' - '.date('r', $val).'</strong></small>&#160;';
+						} else if($key != 'logline'){
 							echo '<a href="?query='.$_GET['query'].' '.$key.':'.$val.'"><small>'.$key.': <strong>'.hstring($sterms, $val).'</strong></small></a>&#160;';
 						}
 					}

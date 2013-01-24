@@ -16,36 +16,25 @@
 
 
 void usage(){
-    printf("Missing -i argument, please specify a index\n");
+	printf("Usage: search -i <index> -f <field> -q <query>\n\n");
+	printf("   -i Index location\n");
+	printf("   -f Default search field field\n");
+	printf("   -q Lucene query string\n\n");
 }
-
-
-void ctow(const char* from, TCHAR* to){
-#if defined(_UCS2)
-	std::wstring test;
-	test.assign(from, from+strlen(from));
-	wcsncpy(to, test.c_str(), test.length()+1);
-#else
-	std::cout << "NORMAL" << std::endl;
-#endif
-
-}
-
-
 
 int main (int argc, char *argv[]){
 	
     int argument;
 
     bool  index_location_flag = false;
-    char *index_location;
+    char *index_location = NULL;
 
 	bool  field_arg_flag = false;
-    char *field_arg;
+    char *field_arg = NULL;
 	
 
 	bool  query_arg_flag = false;
-    char *query_arg;
+    char *query_arg = NULL;
 
    
     while((argument = getopt(argc, argv, "i:hq:f:")) != -1){
@@ -75,11 +64,11 @@ int main (int argc, char *argv[]){
     argv += optind;
 	
 	
-    if(!index_location_flag){
+    if(!index_location_flag || !field_arg_flag || !query_arg_flag){
         usage();
         exit(1);
     }
-
+	
 	
 	try {
 		logcollect::CluceneIndexReader* reader = new logcollect::CluceneIndexReader(index_location);
@@ -99,10 +88,6 @@ int main (int argc, char *argv[]){
 		json_object_set(resultset, "result", objects);
 		
 		std::cout << json_dumps(resultset, JSON_ENCODE_ANY) << std::endl;
-		
-		
-		
-
 		delete reader;
 		
 		

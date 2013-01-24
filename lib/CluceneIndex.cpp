@@ -5,6 +5,7 @@
 #include <CLucene.h>
 #include "../include/CluceneIndex.h"
 #include "../include/Result.h"
+#include "../include/DateConversion.h"
 
 
 logcollect::CluceneIndex::CluceneIndex(const std::string index){
@@ -19,7 +20,7 @@ logcollect::CluceneIndex::CluceneIndex(const std::string index){
 	this->writer->setMaxFieldLength(0x7FFFFFFFL);
 }
 
-void logcollect::CluceneIndex::index(Result *r){
+void logcollect::CluceneIndex::index(Result *r, DateConversion* converter){
 	
 	// Convert normal strings into wstrings for use with lucene::document::Field
 	const std::string *str_fielddata = r->getData();
@@ -36,14 +37,34 @@ void logcollect::CluceneIndex::index(Result *r){
     logcollect::result_map::iterator it;
 
 	std::wstring name, value;
+
+	
 	for(it = fields->begin(); it != fields->end(); it++){
 		
 		name.assign(it->first.begin(), it->first.end());
 		value.assign(it->second.begin(), it->second.end());
+		lucene::document::Field *field;
 		
-		lucene::document::Field *field = new lucene::document::Field(name.c_str(), value.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_TOKENIZED );
+		if(name.compare(L"timestamp") == 0){
+			
+			
+			
+			std::string str_timestamp = it->second;
+//			std::cout << "'" << it->second << "'" << std::endl;
+//
+			time_t int_timestamp = converter->getTime(&it->second) * 1000;
+			
+//			std::cout << int_timestamp << std::endl;
+			
+			
+			TCHAR* timestamp = lucene::document::DateTools::timeToString(int_timestamp, lucene::document::DateTools::MILLISECOND_FORMAT );
+//			std::wcout << timestamp << std::endl;
+			
+			field = new lucene::document::Field(name.c_str(), timestamp, lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_TOKENIZED );
+		} else {
+			field = new lucene::document::Field(name.c_str(), value.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_TOKENIZED );
+		}
 		this->document->add(*field);
-
 	}
 	
 
