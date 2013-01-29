@@ -26,8 +26,10 @@ namespace logcollect {
 		std::string name;
 		std::string pattern;
 		pcre* expression;
+		int expression_size;
 		pcre_extra* expression_extra;
 		pcre* value_expression;
+		int value_expression_size;
 		pcre_extra* value_expression_extra;
 		subpattern_map subpatterns;
 		

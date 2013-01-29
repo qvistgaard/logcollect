@@ -15,6 +15,7 @@ logcollect::Result::Result(std::string data){
 }
 
 void logcollect::Result::add(std::string field, std::string value){
+	std::transform(field.begin(), field.end(), field.begin(), ::tolower);
 	this->fields.insert(result_pair(field, value));
 }
 
@@ -26,6 +27,9 @@ const std::string* logcollect::Result::getData(){
 	return &this->data;
 }
 
+logcollect::Result::~Result(){
+
+}
 
 
 void logcollect::Result::dump(){

@@ -48,9 +48,10 @@ logcollect::Pattern* logcollect::Patterns::getPattern(const std::string &name){
 
 logcollect::Result* logcollect::Patterns::match(std::string pattern_name, std::string data){
 	Pattern *pattern = this->getPattern(pattern_name);
-	this->log->info("Matching '" + data + "' against pattern: '" + pattern_name + "'");
+	// this->log->info("Matching '" + data + "' against pattern: '" + pattern_name + "'");
 	if(pattern){
-		this->log->debug(" - Match OK!");
+//		this->log->debug(" - Match OK!");
+//		return new Result(data);
 		return pattern->match(data);
 	} else {
 		throw "Pattern does not exists: " + pattern_name;
