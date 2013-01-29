@@ -2,6 +2,7 @@
 
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <CLucene.h>
 
@@ -84,6 +85,13 @@ int main (int argc, char *const argv[]){
 
 	
 	
+	time_t start, end;
+	float perfcounter = 0;
+	
+	time(&start);
+	
+
+	
 	try {
 
 		int counter = 0;
@@ -97,19 +105,37 @@ int main (int argc, char *const argv[]){
 			r = p->match(format, input_line);
 			if(r){
 				index->index(r, converter);
-				// r->dump();
+			//	r->dump();
 				counter++;
+				time(&end);
+				std::cout << "\r";
+				
+				perfcounter = (double) (end - start);
+				
+//				printf(" Test   %f %d", perfcounter, (end - start));
+				std::cout << std::right << std::setw(10) << counter;
+				if(perfcounter > 0){
+					std::cout << std::right << std::setw(10) << std::setprecision(0) << std::fixed << (counter / perfcounter);
+					std::cout << "/sec\t Time: " << (end - start);
+				}
+				
+
 			}
 		
 			delete r;
 		}
-		std::cout << "Indexed " << counter << "  loglines" << std::endl;
+		std::cout << "\n";
+//		std::cout << "\rIndexed " << counter << "  loglines" << std::endl;
+		delete index;
+		
 	} catch (CLuceneError &error) {
 		printf("Fejl %s\n", error.what());
 	} catch (std::string error){
 		std::cout << error << std::endl;
+	} catch (std::bad_alloc& ba){
+		std::cout << "bad_alloc caught: " << ba.what() << std::endl;
 	}
-	delete index;
+
     return 0;
 }
 
