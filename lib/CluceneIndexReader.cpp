@@ -30,9 +30,10 @@ int logcollect::CluceneIndexReader::query(json_t* json, const char* query, const
  	this->makeTCHAR(query, wquery);
 	this->makeTCHAR(field, wfield);
 	
-	
+	lucene::search::Sort* s = new lucene::search::Sort(L"timestamp");
 	lucene::search::Query* q = lucene::queryParser::QueryParser::parse(wquery, wfield, this->analyzer);
-	lucene::search::Hits* h = this->searcher->search(q);
+	lucene::search::Hits* h = this->searcher->search(q, s);
+// 	lucene::search::Hits* h = this->searcher->search(q);
 
 	
 	int length = h->length() - offset - 1;
@@ -50,7 +51,7 @@ int logcollect::CluceneIndexReader::query(json_t* json, const char* query, const
 		json_t* object = json_object();
 		
 	
-		doc = h->doc(offset);
+		doc = h->doc(i);
 		
 		
 		lucene::document::DocumentFieldEnumeration* tfields;
@@ -59,8 +60,6 @@ int logcollect::CluceneIndexReader::query(json_t* json, const char* query, const
 		tfields = doc.fields();
 		while( (tfield = tfields->nextElement()) ){
 
-			
-			
 			char* fieldname = new char[wcslen(tfield->name())+1];
 			char* fieldvalue = new char[wcslen(tfield->stringValue())+1];
 			json_t* value;
@@ -83,6 +82,7 @@ int logcollect::CluceneIndexReader::query(json_t* json, const char* query, const
 			
 			delete[] fieldname;
 			delete[] fieldvalue;
+
 		}
 		json_array_append(json, object);
 

@@ -35,7 +35,7 @@ time_t logcollect::DateConversion::getTime(const std::string* str_time){
 		if(first != NULL){
 			// std::cout << "converted: " << (*it)->c_str() << std::endl;
 			found_format = true;
-			detected_time = mktime(result);
+			detected_time = timegm(result);
 			// std::cout << "time: " << detected_time << std::endl;
 			break;
 		}

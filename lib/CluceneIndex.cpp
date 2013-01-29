@@ -9,7 +9,7 @@
 
 
 logcollect::CluceneIndex::CluceneIndex(const std::string index){
-	this->analyzer = new lucene::analysis::SimpleAnalyzer();
+	this->analyzer = new lucene::analysis::standard::StandardAnalyzer();
 	this->document = new lucene::document::Document();
 
 	if(lucene::index::IndexReader::indexExists(index.c_str())){
@@ -18,6 +18,10 @@ logcollect::CluceneIndex::CluceneIndex(const std::string index){
 		this->writer = new lucene::index::IndexWriter(index.c_str(), this->analyzer, true);
 	}
 	this->writer->setMaxFieldLength(0x7FFFFFFFL);
+	this->writer->setUseCompoundFile(false);
+	this->writer->setMaxBufferedDocs(10000000);
+//	this->writer->setMinMergeDocs(5000000);
+	
 }
 
 void logcollect::CluceneIndex::index(Result *r, DateConversion* converter){
@@ -29,7 +33,7 @@ void logcollect::CluceneIndex::index(Result *r, DateConversion* converter){
 	fielddata.assign(str_fielddata->begin(), str_fielddata->end());
 
 	// Add entire logline as field logline
-	lucene::document::Field *field = new lucene::document::Field(fieldname.c_str(), fielddata.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_TOKENIZED);
+	lucene::document::Field *field = new lucene::document::Field(fieldname.c_str(), fielddata.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_TOKENIZED | lucene::document::Field::STORE_COMPRESS /* | lucene::document::Field::INDEX_NONORMS */ | lucene::document::Field::TERMVECTOR_NO );
 	this->document->add(*field);
 
 	// Add field for each result
@@ -60,9 +64,9 @@ void logcollect::CluceneIndex::index(Result *r, DateConversion* converter){
 			TCHAR* timestamp = lucene::document::DateTools::timeToString(int_timestamp, lucene::document::DateTools::MILLISECOND_FORMAT );
 //			std::wcout << timestamp << std::endl;
 			
-			field = new lucene::document::Field(name.c_str(), timestamp, lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_TOKENIZED );
+			field = new lucene::document::Field(name.c_str(), timestamp, lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED | lucene::document::Field::INDEX_NONORMS | lucene::document::Field::TERMVECTOR_NO );
 		} else {
-			field = new lucene::document::Field(name.c_str(), value.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_TOKENIZED );
+			field = new lucene::document::Field(name.c_str(), value.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_TOKENIZED  | lucene::document::Field::INDEX_NONORMS | lucene::document::Field::TERMVECTOR_NO );
 		}
 		this->document->add(*field);
 	}
@@ -70,24 +74,12 @@ void logcollect::CluceneIndex::index(Result *r, DateConversion* converter){
 
 	
 	this->writer->addDocument(this->document);
-	
-	/*
-	lucene::document::DocumentFieldEnumeration* tfields;
-	lucene::document::Field* tfield;
-	
-	tfields = this->document->fields();
-	
-	while(tfield = tfields->nextElement()){
-		const TCHAR* fname = tfield->name();
-		const TCHAR* value = tfield->stringValue();
-		std::wcout << fname << ": "<< tfield->toString() << std::endl;
-	}
-	 */
+
 
 	this->document->clear();
 	
 	if(this->indexed > 100000){
-		//this->writer->optimize();
+	//	this->writer->optimize();
 		this->indexed = 0;
 	} else {
 		this->indexed++;
