@@ -20,7 +20,7 @@ if(is_null($result)){
 	echo $query;
 }
 
-date_default_timezone_set('GMT');
+date_default_timezone_set('Europe/Copenhagen');
 
 $sterms = explode(" ", $_GET['query']);
 foreach($sterms as &$sterm){
@@ -31,7 +31,7 @@ foreach($sterms as &$sterm){
 	//echo var_dump($query);
 
 function hstring(array $terms, $string){
-	$string = preg_replace('/('.implode('|', $terms).')/i', '<span style="background-color: #CDCD00">\\1</span>', $string);
+	$string = preg_replace('/('.implode('|', $terms).')/i', '<span style="background-color: #DDFFCC; font-weight: bold;">\\1</span>', $string);
 	/*
 	foreach($terms as $term){
 	//	var_dump($term);
@@ -42,25 +42,35 @@ function hstring(array $terms, $string){
 	*/
 	return $string;
 }
+$i = 0;
+
+echo 'Total number of hits: '.number_format($result->count).' - ';
+
+$time_end = microtime(true);
+$time = $time_end - $time_start;
+echo "search finished in $time seconds";
 
 ?>
+
 	<table>
 		<tbody>
-			<?php while(list($key, $val) = each($result->result)){ ?>
-			<tr>
-				<td><pre><?php
+			<?php while(list($key, $val) = each($result->result)){ $i++; ?>
+			<tr style="<?php if($i % 2 == 1){ echo 'background-color: #EAEAEA;'; } ?>">
+				<td style="padding: 5px;"><?php
+
+
 					echo hstring($sterms, $val->logline).'<br/>';
 					foreach($val as  $key => $val){
 						if($key == 'timestamp'){
 							// strftime('%FT%T%z', $val)
 
-							echo '<small>'.$key.': <strong>'.$val.' - '.strftime('%FT%T%z', $val).' - '.date('r', $val).'</strong></small>&#160;';
+							echo '<small>'.$key.': <strong>'.strftime('%FT%T%z', $val).'</strong></small>&#160;';
 						} else if($key != 'logline'){
-							echo '<a href="?query='.$_GET['query'].' '.$key.':'.$val.'"><small>'.$key.': <strong>'.hstring($sterms, $val).'</strong></small></a>&#160;';
+							echo '<small style="color: #888888;">'.$key.': <a href="?query='.urlencode($_GET['query'].' +'.$key.':'.$val).'"><strong>'.hstring($sterms, $val).'</strong></a></small>&#160;';
 						}
 					}
 
-				?></pre></td>
+				?></td>
 			</tr>
 			<?php } ?>
 		</tbody>
@@ -71,8 +81,5 @@ function hstring(array $terms, $string){
 <?php
 
 
-$time_end = microtime(true);
-$time = $time_end - $time_start;
 
-echo "search finished in $time seconds\n";
 ?>
