@@ -6,6 +6,7 @@
 //  Copyright (c) 2013 Steffen Sørensen. All rights reserved.
 //
 #include <iostream>
+#include <vector>
 #include <jansson.h>
 #include <CLucene.h>
 #include "../include/CluceneIndexReader.h"
@@ -19,6 +20,10 @@ logcollect::CluceneIndexReader::CluceneIndexReader(const char* index){
 	}
 	this->analyzer = new lucene::analysis::standard::StandardAnalyzer;
 	this->searcher = new lucene::search::IndexSearcher(this->reader);
+}
+
+int logcollect::CluceneIndexReader::getTotal(){
+	return this->reader->numDocs();
 }
 
 int logcollect::CluceneIndexReader::query(json_t* json, const char* query, const char* field, int limit, int offset){
@@ -55,6 +60,7 @@ int logcollect::CluceneIndexReader::query(json_t* json, const char* query, const
 		
 		
 		lucene::document::DocumentFieldEnumeration* tfields;
+		
 		lucene::document::Field* tfield;
 		
 		tfields = doc.fields();

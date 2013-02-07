@@ -13,6 +13,9 @@ Log collect have several dependencies
 - jansson (C library for creating and reading JSON)
 - Clucene (C++ implementation of apache lucene fulltext index)
 - PCRE (C Library for using perl regular expressions)
+- libconfig (C/C++ library for parsing configuration files)
+
+You will also need a system that has support for kqueue (*BSD or Mac OS X)
 
 
 Compiling
@@ -32,7 +35,8 @@ specified in the command line arguments.
 Usage: logcollectd -f <format> -i <index> -r <rules>  
   
    -r format rule file location  
-   -i index location  
+   -c config file location
+   -i index location 
    -f format to match data against  
   
 
@@ -49,7 +53,7 @@ Searching can also be done from the command line, however
 the search tool returns json, and can be called using the
 following arguments.
 
-Usage: search -f <format> -i <index> -r <rules>  
+Usage: search -f &gt;format> -i <index> -r <rules>  
   
    -i Index location  
    -f Default search field field  

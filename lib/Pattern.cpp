@@ -72,7 +72,7 @@ logcollect::Result* logcollect::Pattern::match(const std::string data){
 		// Create key=value pair matching pattern
 		
 		
-		this->value_expression = pcre_compile("(\\S+\?)?(\\S+)=(?!,|\\s)(\"|<)?(\\S+?)(\"|>)?(\\s|,\\s|&|,|;|:|$)", 0, &error, &erroffset, NULL);
+		this->value_expression = pcre_compile("(\\S+\\?)?(\\S+)=(?!,|\\s)(\"|<)?(\\S+?)(\"|>)?(\\s|,\\s|&|,|;|:|$)", 0, &error, &erroffset, NULL);
 //		this->value_expression = pcre_compile("(\\S+)=(\")?(\\S+)(\")?(\\s|,|&)", 0, &error, &erroffset, NULL);
 		this->value_expression_extra = pcre_study(this->value_expression, 0, &error_extra);
 		pcre_fullinfo(this->value_expression, this->value_expression_extra, PCRE_INFO_CAPTURECOUNT, &this->value_expression_size);
