@@ -42,7 +42,7 @@ logcollect::Pattern* logcollect::Patterns::getPattern(const std::string &name){
     if(pattern_it != this->patterns.end()){
         return pattern_it->second;
     } else {
-        return false;
+        return nullptr;
     }
 }
 

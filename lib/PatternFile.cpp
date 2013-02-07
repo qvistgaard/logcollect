@@ -52,7 +52,7 @@ logcollect::Pattern* logcollect::PatternFile::_buildPattern(const char *line){
         return new Pattern(pattern_name, pattern);
     } else {
         // Return false if it is invalid
-        return false;
+        return nullptr;
     }
 
 }

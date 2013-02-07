@@ -28,6 +28,7 @@ namespace logcollect {
 		CluceneIndex(const std::string index);
 		~CluceneIndex();
 		void index(Result *r, DateConversion* converter);
+		void index(Result *r);		
 	};
 }
 

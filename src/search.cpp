@@ -83,6 +83,7 @@ int main (int argc, char *argv[]){
 		results = reader->query(objects, query_arg, field_arg, limit, offset);
 		
 		json_object_set(resultset, "count", json_integer(results));
+		json_object_set(resultset, "total", json_integer(reader->getTotal()));
 		json_object_set(resultset, "limit", json_integer(limit));
 		json_object_set(resultset, "offset", json_integer(offset));
 		json_object_set(resultset, "result", objects);

@@ -24,6 +24,10 @@ logcollect::CluceneIndex::CluceneIndex(const std::string index){
 	
 }
 
+void logcollect::CluceneIndex::index(Result *r){
+	this->index(r, nullptr);
+}
+
 void logcollect::CluceneIndex::index(Result *r, DateConversion* converter){
 	
 	// Convert normal strings into wstrings for use with lucene::document::Field
@@ -75,8 +79,8 @@ void logcollect::CluceneIndex::index(Result *r, DateConversion* converter){
 	this->writer->addDocument(this->document);
 	this->document->clear();
 	
-	if(this->indexed > 100000){
-	//	this->writer->optimize();
+	if(this->indexed > 10){
+		this->writer->optimize();
 		this->indexed = 0;
 	} else {
 		this->indexed++;

@@ -5,31 +5,34 @@
 #include <iomanip>
 #include <fstream>
 #include <CLucene.h>
+#include <librelp.h>
+#include <libconfig.h++>
 
 #include "../include/Pattern.h"
 #include "../include/Logger.h"
 #include "../include/Result.h"
+#include "../include/Inputs.h"
 #include "../include/PatternFile.h"
 #include "../include/CluceneIndex.h"
 #include "../include/DateConversion.h"
+
 
 #define PATTERN_LENGTH 1024
 
 
 
 void usage(){
-	printf("Usage: logcollectd -f <format> -i <index> -r <rules>\n\n");
-	printf("   -r format rule file location\n");
+	printf("Usage: logcollectd -f <format> -i <index>\n\n");
 	printf("   -i index location\n");
-	printf("   -f format to match data against\n\n");
+	printf("   -f format to match data against\n");
+	printf("   -c Config file\n\n");	
 }
 
 
 int main (int argc, char *const argv[]){
     int argument;
-    
-    bool  file_rules_flag = false;
-    char *file_rules = NULL;
+	
+    bool  daemon_flag = false;
 	
     bool  index_location_flag = false;
     char *index_location = NULL;
@@ -37,12 +40,12 @@ int main (int argc, char *const argv[]){
     bool  format_flag = false;
     char *format = NULL;
 	
-    while((argument = getopt(argc, argv, "r:i:f:h")) != -1){
+    bool  config_flag = false;
+    char *config = NULL;
+	
+	
+    while((argument = getopt(argc, argv, "r:i:f:c:hd")) != -1){
         switch(argument){
-            case 'r':
-                file_rules_flag = true;
-                file_rules = optarg;
-                break;
             case 'i':
 				index_location_flag = true;
                 index_location = optarg;
@@ -51,6 +54,13 @@ int main (int argc, char *const argv[]){
 				format_flag = true;
                 format = optarg;
                 break;
+            case 'c':
+				config_flag = true;
+                config = optarg;
+                break;
+            case 'd':
+				daemon_flag = true;
+				break;
             case 'h':
             case '?':
             default:
@@ -63,12 +73,131 @@ int main (int argc, char *const argv[]){
     argv += optind;
 
 
-    if(!file_rules_flag || !index_location_flag || !format_flag){
+    if(!config_flag){
         usage();
         exit(1);
     }
 	
+	logcollect::Logger *logger = NULL;
+	char logline[4096];
+	// Start the logger
+	if(!daemon_flag){
+		logger = new logcollect::Logger();
+	} else {
+		printf("Daemon flag is not implimented yet!");
+		exit(1);
+	}
 	
+
+	try {
+		// Create config instance
+		libconfig::Config cfg;
+		
+		// Declare config variables
+		std::string cfg_patterns = "patterns";
+		std::string cfg_index = "index";
+		std::string cfg_indexer = "indexer"; // Indexer is unused for now
+		std::string cfg_sources = "sources";
+		
+		std::string cfg_input_type = "type";
+		std::string cfg_input_format = "format";
+		std::string cfg_input_date_formats = "date_formats";
+		
+		// Declare config variable values
+		std::string cfg_patterns_file, cfg_index_location;
+		
+		// Read config file and confirm with logline
+		cfg.readFile(config);
+		sprintf(logline, "Loaded config file: %s", config);
+		logger->info(logline);
+		
+		
+		// Lookup configuration values
+		cfg.lookup(cfg_patterns);
+		cfg.lookup(cfg_indexer);
+		cfg.lookup(cfg_index);
+		libconfig::Setting& sources = cfg.lookup(cfg_sources);
+
+		
+		// Read core configuration values
+		cfg.lookupValue(cfg_patterns, cfg_patterns_file);
+		cfg.lookupValue(cfg_index, cfg_index_location);
+		
+		// Print some log informations about index and rules file
+		sprintf(logline, "Using rules file: %s", cfg_patterns_file.c_str());
+		logger->info(logline);
+		sprintf(logline, "Using index location: %s", cfg_index_location.c_str());
+		logger->info(logline);
+		
+		
+		// Load and parse rules
+		logcollect::Patterns *p = new logcollect::Patterns(logger);
+		logcollect::PatternFile *rules = new logcollect::PatternFile(logger, cfg_patterns_file);
+		rules->addPatterns(p);
+
+		
+
+// 		std::cout << sources.getLength() << " sources found" << std::endl;
+
+		
+		logcollect::Inputs::Input* input[sources.getLength()];
+		
+		
+		
+		for(int i = 0; i < 1; i++){
+			std::string type, format;
+
+			sources[i].lookupValue(cfg_input_type, type);
+			
+			std::string index_location;
+			if(cfg_index_location.at(cfg_index_location.length()-1) == '/'){
+				index_location = cfg_index_location + sources[i].getName() + "/";
+			} else {
+				index_location = cfg_index_location + "/" + sources[i].getName() + "/";
+			}
+			
+			sources[i].lookupValue(cfg_input_format, format);
+			logcollect::Pattern* pattern = p->getPattern(format);
+			
+			if(!pattern){
+				throw "Could not find pattern";
+			}
+
+			if(type.compare("file") == 0){
+				
+				logcollect::DateConversion* converter = new logcollect::DateConversion();
+				
+				input[i] = logcollect::Inputs::Input::createInput<logcollect::Inputs::File>(&sources[i], new logcollect::CluceneIndex(index_location), pattern, converter);
+				input[i]->run(); // Move this to a later stage, only here for testing
+				delete input[i];
+			} else {
+				std::cout << "Invalid type: " << type << std::endl;
+			}
+
+			// std::cout << " - " << sources[i].getName() << type  << " " << index_location << std::endl;
+	
+
+		}
+
+
+	
+		
+	} catch(libconfig::ParseException e){
+		std::cout << e.getError() << " in line: " << e.getLine() << std::endl;
+	} catch(libconfig::SettingNotFoundException e){
+		std::cout << e.getPath() << " Was not found" << std::endl;
+	} catch(char const* e){
+		std::cout << e << std::endl;
+	} catch(CLuceneError e){
+		std::cout << "Clucene error: " << e.what() << std::endl;
+	}
+	
+	
+	
+	
+	exit(0);
+	
+	/*
 	// std::string timestamp = "2012-07-19T09:39:59+02:00";
 	
 	logcollect::DateConversion* converter = new logcollect::DateConversion();
@@ -76,12 +205,11 @@ int main (int argc, char *const argv[]){
 	converter->addFormat(new std::string("%FT%T"));
 	
     
-    logcollect::Logger *logger = new logcollect::Logger();
-    logcollect::Patterns *p = new logcollect::Patterns(logger);
-    logcollect::PatternFile *rules = new logcollect::PatternFile(logger, file_rules);
-	logcollect::CluceneIndex *index = new logcollect::CluceneIndex(index_location);
-	
-    rules->addPatterns(p);
+
+//    logcollect::Patterns *p = new logcollect::Patterns(logger);
+//    logcollect::PatternFile *rules = new logcollect::PatternFile(logger, file_rules);
+//	  logcollect::CluceneIndex *index = new logcollect::CluceneIndex(index_location);
+//    rules->addPatterns(p);
 
 	
 	
@@ -126,6 +254,7 @@ int main (int argc, char *const argv[]){
 		}
 		std::cout << "\n";
 //		std::cout << "\rIndexed " << counter << "  loglines" << std::endl;
+ 
 		delete index;
 		
 	} catch (CLuceneError &error) {
@@ -135,8 +264,10 @@ int main (int argc, char *const argv[]){
 	} catch (std::bad_alloc& ba){
 		std::cout << "bad_alloc caught: " << ba.what() << std::endl;
 	}
-
+	 */
     return 0;
+
+					 
 }
 
 

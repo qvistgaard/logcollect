@@ -6,7 +6,7 @@
 <?php
 
 	$time_start = microtime(true);
-$query = '../src/search -i ../var/ -q "'.$_GET['query'].'" -f logline';
+$query = '../src/search -i ../var/messages -q "'.$_GET['query'].'" -f logline';
 
 
 
@@ -44,7 +44,7 @@ function hstring(array $terms, $string){
 }
 $i = 0;
 
-echo 'Total number of hits: '.number_format($result->count).' - ';
+echo 'Total number of hits: '.number_format($result->count).'/'.number_format($result->total).' - ';
 
 $time_end = microtime(true);
 $time = $time_end - $time_start;
@@ -58,8 +58,13 @@ echo "search finished in $time seconds";
 			<tr style="<?php if($i % 2 == 1){ echo 'background-color: #EAEAEA;'; } ?>">
 				<td style="padding: 5px;"><?php
 
+					$val->logline = htmlspecialchars($val->logline);
 
-					echo hstring($sterms, $val->logline).'<br/>';
+					$val->logline = preg_replace('/(\S+:\/\/.*?)(\s|$)/', '<a href="\\1">\\0</a>', $val->logline);
+
+						echo $val->logline.'<br/>';
+
+					// echo hstring($sterms, $val->logline).'<br/>';
 					foreach($val as  $key => $val){
 						if($key == 'timestamp'){
 							// strftime('%FT%T%z', $val)

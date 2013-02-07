@@ -28,7 +28,7 @@ namespace logcollect {
 		void dump();
 		result_map* getFields();
 		const std::string* getData();
-	~Result();
+		~Result();
     };
 }
 

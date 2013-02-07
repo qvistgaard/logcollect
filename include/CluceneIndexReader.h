@@ -26,6 +26,7 @@ namespace logcollect {
 	public:
 		CluceneIndexReader(const char* index);
 		int query(json_t* json, const char* query, const char* field, int limit=30, int offset=0);
+		int getTotal();
 		~CluceneIndexReader();
 	};
 }

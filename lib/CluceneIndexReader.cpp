@@ -37,8 +37,8 @@ int logcollect::CluceneIndexReader::query(json_t* json, const char* query, const
 	
 	lucene::search::Sort* s = new lucene::search::Sort(L"timestamp");
 	lucene::search::Query* q = lucene::queryParser::QueryParser::parse(wquery, wfield, this->analyzer);
-	lucene::search::Hits* h = this->searcher->search(q, s);
-// 	lucene::search::Hits* h = this->searcher->search(q);
+//	lucene::search::Hits* h = this->searcher->search(q, s);
+ 	lucene::search::Hits* h = this->searcher->search(q);
 
 	
 	int length = h->length() - offset - 1;
@@ -74,7 +74,7 @@ int logcollect::CluceneIndexReader::query(json_t* json, const char* query, const
 			this->toChar(tfield->name(), fieldname);
 			if(strcmp(fieldname, "timestamp") == 0){
 				int64_t timestamp = lucene::document::DateTools::stringToTime(tfield->stringValue());
-				timestamp = timestamp;
+				// timestamp = timestamp;
 				value = json_integer(timestamp / 1000);
 /*
 				this->toChar(tfield->stringValue(), fieldvalue);
