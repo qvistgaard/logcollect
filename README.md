@@ -32,12 +32,9 @@ via a pipe into logcollectd and it will index using the rules
 specified in the command line arguments.
 
 
-Usage: logcollectd -f <format> -i <index> -r <rules>  
+Usage: logcollectd -c &lt;config&gt;
   
-   -r format rule file location  
    -c config file location
-   -i index location 
-   -f format to match data against  
   
 
 Searching data
@@ -53,7 +50,7 @@ Searching can also be done from the command line, however
 the search tool returns json, and can be called using the
 following arguments.
 
-Usage: search -f &gt;format> -i <index> -r <rules>  
+Usage: search -f &lt;format&gt; -i &lt;index&gt; -r &lt;rules&gt;  
   
    -i Index location  
    -f Default search field field  
