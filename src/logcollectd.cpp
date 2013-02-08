@@ -34,26 +34,12 @@ int main (int argc, char *const argv[]){
 	
     bool  daemon_flag = false;
 	
-    bool  index_location_flag = false;
-    char *index_location = NULL;
-
-    bool  format_flag = false;
-    char *format = NULL;
-	
     bool  config_flag = false;
     char *config = NULL;
 	
 	
-    while((argument = getopt(argc, argv, "r:i:f:c:hd")) != -1){
+    while((argument = getopt(argc, argv, "c:hd")) != -1){
         switch(argument){
-            case 'i':
-				index_location_flag = true;
-                index_location = optarg;
-                break;
-            case 'f':
-				format_flag = true;
-                format = optarg;
-                break;
             case 'c':
 				config_flag = true;
                 config = optarg;
