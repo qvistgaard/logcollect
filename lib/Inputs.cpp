@@ -61,7 +61,7 @@ bool logcollect::Inputs::Input::setConverter(logcollect::DateConversion* convert
 }
 
 
-bool logcollect::Inputs::Input::indexLine(std::string* line){
+bool logcollect::Inputs::Input::indexLine(const std::string* line){
 	return this->indexLine(line->c_str());
 }
 
@@ -70,8 +70,6 @@ bool logcollect::Inputs::Input::indexLine(const char* line){
 	if(r){
 		this->r->dump();
 		this->index->index(this->r, this->converter);
-	} else {
-		std::cout << "No MATCH: " << line << std::endl;
 	}
 	delete this->r;
 	return true;
@@ -101,6 +99,8 @@ void logcollect::Inputs::File::run(){
 		perror("kqueue");
 	} else {
 		for (;;) {
+			
+			
 			struct kevent kv[1], kvc[1];
 
 			// Check and see if file is open, if the file is'nt open try and open it.
@@ -125,7 +125,8 @@ void logcollect::Inputs::File::run(){
 					
 					// Resize line, so wee don't have to do it more than once
 					std::string line;
-					line.resize(kvc[i].data);
+					line.resize(kvc[i].data+1);
+					line.erase();
 
 					// Go through data and append to line string
 					// should we find ascii code 10 (line feed)
@@ -141,6 +142,7 @@ void logcollect::Inputs::File::run(){
 					}
 				}
 			}
+			
 		}
 	}
 }

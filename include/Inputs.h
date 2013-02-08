@@ -55,7 +55,7 @@ namespace logcollect {
 			bool setIndex(logcollect::CluceneIndex* index);
 			bool setConverter(logcollect::DateConversion* converter);
 			bool indexLine(const char* line);
-			bool indexLine(std::string* line);
+			bool indexLine(const std::string* line);
 			~Input();
 			
 		};
