@@ -35,9 +35,11 @@ int main (int argc, char *argv[]){
 
 	bool  query_arg_flag = false;
     char *query_arg = NULL;
+	
+	int limit=30, offset=0;
 
    
-    while((argument = getopt(argc, argv, "i:hq:f:")) != -1){
+    while((argument = getopt(argc, argv, "i:hq:f:l:o:")) != -1){
         switch(argument){
             case 'i':
 				index_location_flag = true;
@@ -51,7 +53,12 @@ int main (int argc, char *argv[]){
 				field_arg_flag = true;
                 field_arg = optarg;
                 break;
-				
+            case 'l':
+				limit = atoi(optarg);
+                break;
+            case 'o':
+				offset = atoi(optarg);
+                break;
             case 'h':
             case '?':
             default:
@@ -76,7 +83,7 @@ int main (int argc, char *argv[]){
 		json_t* resultset = json_object();
 		
 	
-		int results, limit=30, offset=0;
+		int results;
 		
 		
 		json_t* objects = json_array();
