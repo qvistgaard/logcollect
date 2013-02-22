@@ -22,7 +22,9 @@ namespace logcollect {
 	public:
 		DateConversion();
 		bool addFormat(std::string* format);
+		bool addFormat(const char* format);
 		time_t getTime(const std::string* str_time);
+		time_t getTime(const char* str_time);
 	};
 }
 
