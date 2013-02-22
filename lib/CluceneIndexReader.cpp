@@ -35,24 +35,24 @@ int logcollect::CluceneIndexReader::query(json_t* json, const char* query, const
  	this->makeTCHAR(query, wquery);
 	this->makeTCHAR(field, wfield);
 	
-	lucene::search::Sort* s = new lucene::search::Sort(L"timestamp");
+	lucene::search::Sort* s = new lucene::search::Sort(L"timestamp", true);
 	lucene::search::Query* q = lucene::queryParser::QueryParser::parse(wquery, wfield, this->analyzer);
-//	lucene::search::Hits* h = this->searcher->search(q, s);
- 	lucene::search::Hits* h = this->searcher->search(q);
+	lucene::search::Hits* h = this->searcher->search(q, s);
+// 	lucene::search::Hits* h = this->searcher->search(q);
 
 	
 	int length = h->length() - offset - 1;
 	if(length > limit){
-		length = limit;
+		length = limit + offset;
 	}
 	
 	/*
 	printf("Lenght: %d\n", h->length());
 	printf("Limit: %d\n", length);
 	printf("Offset: %d\n", length);	
-	 */
+	*/
 	lucene::document::Document doc;
-	for(int i = 0; i < length; i++){
+	for(int i = offset; i <= length; i++){
 		json_t* object = json_object();
 		
 	
@@ -72,7 +72,7 @@ int logcollect::CluceneIndexReader::query(json_t* json, const char* query, const
 			
 			
 			this->toChar(tfield->name(), fieldname);
-			if(strcmp(fieldname, "timestamp") == 0){
+			if(strcmp(fieldname, "_timestamp") == 0){
 				int64_t timestamp = lucene::document::DateTools::stringToTime(tfield->stringValue());
 				// timestamp = timestamp;
 				value = json_integer(timestamp / 1000);

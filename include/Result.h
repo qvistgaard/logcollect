@@ -12,6 +12,7 @@
 #include <map>
 #include <string>
 
+
 namespace logcollect {
     typedef std::map<std::string, std::string> result_map;
     typedef std::pair<std::string, std::string> result_pair;
@@ -21,10 +22,13 @@ namespace logcollect {
     private:
         result_map fields;
 		std::string data;
-        
+		time_t timestamp;
+		
     public:
 		Result(std::string data);
 		void add(std::string field, std::string value);
+		void setTimestamp(time_t timestamp);
+		time_t getTimestamp();
 		void dump();
 		result_map* getFields();
 		const std::string* getData();

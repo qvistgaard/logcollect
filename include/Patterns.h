@@ -33,7 +33,7 @@ namespace logcollect {
         Patterns(Logger *log);
         Pattern* getPattern(const std::string &name);
         bool addPattern(Pattern *pattern);
-		Result* match(std::string pattern_name, std::string data);
+		Result* match(std::string pattern_name, std::string data, DateConversion* converter);
     };
 }
 

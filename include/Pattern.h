@@ -12,6 +12,7 @@
 #include <pcre.h>
 #include <map>
 #include "Result.h"
+#include "DateConversion.h"
 
 
 
@@ -42,7 +43,7 @@ namespace logcollect {
 		const std::string* getName();
 		std::string* getPattern();
 		bool expand(Patterns *patterns);
-		Result* match(const std::string data);
+		Result* match(const std::string data, DateConversion* converter);
 	};
 }
 

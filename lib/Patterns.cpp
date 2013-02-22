@@ -25,7 +25,7 @@ bool logcollect::Patterns::addPattern(Pattern *pattern){
     
     if(pattern_it == this->patterns.end()){
         this->patterns.insert(pattern_pair(*pattern->getName(), pattern));
-		this->log->debug("Added pattern: " + (*pattern->getName()) + " - " + (*pattern->getPattern()));
+		// this->log->debug("Added pattern: " + (*pattern->getName()) + " - " + (*pattern->getPattern()));
 		return this->_expand();
 		return true;
     } else {
@@ -46,13 +46,13 @@ logcollect::Pattern* logcollect::Patterns::getPattern(const std::string &name){
     }
 }
 
-logcollect::Result* logcollect::Patterns::match(std::string pattern_name, std::string data){
+logcollect::Result* logcollect::Patterns::match(std::string pattern_name, std::string data, logcollect::DateConversion* converter){
 	Pattern *pattern = this->getPattern(pattern_name);
 	// this->log->info("Matching '" + data + "' against pattern: '" + pattern_name + "'");
 	if(pattern){
 //		this->log->debug(" - Match OK!");
 //		return new Result(data);
-		return pattern->match(data);
+		return pattern->match(data, converter);
 	} else {
 		throw "Pattern does not exists: " + pattern_name;
 	}
@@ -61,10 +61,10 @@ logcollect::Result* logcollect::Patterns::match(std::string pattern_name, std::s
 bool logcollect::Patterns::_expand(){
     logcollect::pattern_map::iterator pattern_it;
 	
-	this->log->debug("Expanding patterns");
+	// this->log->debug("Expanding patterns");
 	try {
 		for(pattern_it = this->patterns.begin(); pattern_it != this->patterns.end(); pattern_it++){
-			this->log->debug(" - Expanding pattern: " + (*(*pattern_it->second).getName()));
+			// this->log->debug(" - Expanding pattern: " + (*(*pattern_it->second).getName()));
 			pattern_it->second->expand(this);
 		}
 	} catch (std::string pattern){

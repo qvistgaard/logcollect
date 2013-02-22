@@ -12,6 +12,7 @@
 #include "../include/Pattern.h"
 #include "../include/Patterns.h"
 #include "../include/Result.h"
+#include "../include/DateConversion.h"
 
 
 logcollect::Pattern::Pattern(const std::string &name, const std::string &pattern){
@@ -28,7 +29,7 @@ std::string* logcollect::Pattern::getPattern(){
 	return &this->pattern;
 }
 
-logcollect::Result* logcollect::Pattern::match(const std::string data){
+logcollect::Result* logcollect::Pattern::match(const std::string data, logcollect::DateConversion* converter){
 
 	if(this->expression == NULL){
 		const char *error;
@@ -91,6 +92,9 @@ logcollect::Result* logcollect::Pattern::match(const std::string data){
 			pcre_get_substring(data.c_str(), ovector, this->expression_size, it->second, sub);
 			if(strlen(*sub) > 0){
 				r->add(it->first, *sub);
+				if(it->first.compare("timestamp") == 0){
+					r->setTimestamp(converter->getTime(*sub));
+				}
 			}
 			pcre_free_substring(*sub);
 		}
@@ -119,6 +123,8 @@ logcollect::Result* logcollect::Pattern::match(const std::string data){
 				pcre_free_substring(*value);
 			}
 		}
+		
+		
 		return r;
 	}
 	return NULL;

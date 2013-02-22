@@ -47,40 +47,27 @@ void logcollect::CluceneIndex::index(Result *r, DateConversion* converter){
 	std::wstring name, value;
 
 	
+	TCHAR* timestamp = lucene::document::DateTools::timeToString((r->getTimestamp() * 1000), lucene::document::DateTools::MILLISECOND_FORMAT );
+	field = new lucene::document::Field(L"_timestamp", timestamp, lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED | lucene::document::Field::INDEX_NONORMS | lucene::document::Field::TERMVECTOR_NO );
+	this->document->add(*field);	
+	
+	
 //	lucene::document::Field *field;
 	for(it = fields->begin(); it != fields->end(); it++){
 		
 		name.assign(it->first.begin(), it->first.end());
 		value.assign(it->second.begin(), it->second.end());
 
-	
-		if(name.compare(L"timestamp") == 0){
-			
-			std::string str_timestamp = it->second;
-//			std::cout << "'" << it->second << "'" << std::endl;
-//
-			time_t int_timestamp = converter->getTime(&it->second) * 1000;
-			
-//			std::cout << int_timestamp << std::endl;
-			
-			
-			TCHAR* timestamp = lucene::document::DateTools::timeToString(int_timestamp, lucene::document::DateTools::MILLISECOND_FORMAT );
-//			std::wcout << timestamp << std::endl;
-			
-			field = new lucene::document::Field(name.c_str(), timestamp, lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED | lucene::document::Field::INDEX_NONORMS | lucene::document::Field::TERMVECTOR_NO );
-			
-			delete[] timestamp;
-		} else {
-			field = new lucene::document::Field(name.c_str(), value.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_TOKENIZED  | lucene::document::Field::INDEX_NONORMS | lucene::document::Field::TERMVECTOR_NO );
-		}
+		field = new lucene::document::Field(name.c_str(), value.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_TOKENIZED  | lucene::document::Field::INDEX_NONORMS | lucene::document::Field::TERMVECTOR_NO );
+
 		this->document->add(*field);
 	}
 	 
 	this->writer->addDocument(this->document);
 	this->document->clear();
 	
-	if(this->indexed > 10){
-		this->writer->optimize();
+	if(this->indexed >= 1000){
+ 		this->writer->optimize();
 		this->indexed = 0;
 	} else {
 		this->indexed++;
