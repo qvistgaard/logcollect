@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <fstream>
 #include <CLucene.h>
+#include <stdexcept>  
 #include <librelp.h>
 #include <libconfig.h++>
 
@@ -22,9 +23,7 @@
 
 
 void usage(){
-	printf("Usage: logcollectd -f <format> -i <index>\n\n");
-	printf("   -i index location\n");
-	printf("   -f format to match data against\n");
+	printf("Usage: logcollectd -c <config>\n\n");
 	printf("   -c Config file\n\n");	
 }
 
@@ -81,7 +80,7 @@ int main (int argc, char *const argv[]){
 		
 		// Declare config variables
 		std::string cfg_patterns = "patterns";
-		std::string cfg_index = "index";
+		std::string cfg_datadir = "datadir";
 		std::string cfg_indexer = "indexer"; // Indexer is unused for now
 		std::string cfg_sources = "sources";
 		
@@ -90,7 +89,7 @@ int main (int argc, char *const argv[]){
 		std::string cfg_input_date_formats = "date_formats";
 		
 		// Declare config variable values
-		std::string cfg_patterns_file, cfg_index_location;
+		std::string cfg_patterns_file, cfg_datadir_location;
 		
 		// Read config file and confirm with logline
 		cfg.readFile(config);
@@ -101,18 +100,18 @@ int main (int argc, char *const argv[]){
 		// Lookup configuration values
 		cfg.lookup(cfg_patterns);
 		cfg.lookup(cfg_indexer);
-		cfg.lookup(cfg_index);
+		cfg.lookup(cfg_datadir);
 		libconfig::Setting& sources = cfg.lookup(cfg_sources);
 
 		
 		// Read core configuration values
 		cfg.lookupValue(cfg_patterns, cfg_patterns_file);
-		cfg.lookupValue(cfg_index, cfg_index_location);
+		cfg.lookupValue(cfg_datadir, cfg_datadir_location);
 		
 		// Print some log informations about index and rules file
 		sprintf(logline, "Using rules file: %s", cfg_patterns_file.c_str());
 		logger->info(logline);
-		sprintf(logline, "Using index location: %s", cfg_index_location.c_str());
+		sprintf(logline, "Using datadir location: %s", cfg_datadir_location.c_str());
 		logger->info(logline);
 		
 		
@@ -131,17 +130,21 @@ int main (int argc, char *const argv[]){
 		
 		
 		for(int i = 0; i < 1; i++){
+			std::string type;
+			sources[i].lookupValue(cfg_input_type, type);
+			/*
 			std::string type, format;
 
 			sources[i].lookupValue(cfg_input_type, type);
 			
 			std::string index_location;
-			if(cfg_index_location.at(cfg_index_location.length()-1) == '/'){
-				index_location = cfg_index_location + sources[i].getName() + "/";
+			if(cfg_index_location.at(cfg_datadir_location.length()-1) == '/'){
+				index_location = cfg_datadir_location + sources[i].getName() + "/";
 			} else {
-				index_location = cfg_index_location + "/" + sources[i].getName() + "/";
+				index_location = cfg_datadir_location + "/" + sources[i].getName() + "/";
 			}
-			
+			*/
+			/*
 			sources[i].lookupValue(cfg_input_format, format);
 			logcollect::Pattern* pattern = p->getPattern(format);
 			
@@ -149,13 +152,22 @@ int main (int argc, char *const argv[]){
 				throw "Could not find pattern";
 			}
 
+			logcollect::DateConversion* converter = new logcollect::DateConversion();
+			if(sources[i].exists("date_formats")){
+				std::string cformat;
+				libconfig::Setting* formats = &sources[i]["date_formats"];
+				std::cout << formats->getLength() << std::endl;
+				for(int di = 0; di < formats->getLength(); di++){
+					const char *s = sources[i]["date_formats"][di];
+					converter->addFormat(s);
+				}
+			}
+			*/
+			
 			if(type.compare("file") == 0){
-				
-				logcollect::DateConversion* converter = new logcollect::DateConversion();
-				
-				input[i] = logcollect::Inputs::Input::createInput<logcollect::Inputs::File>(&sources[i], new logcollect::CluceneIndex(index_location), pattern, converter);
+				input[i] = logcollect::Inputs::Input::createInput<logcollect::Inputs::File>(&sources[i], p);
 				input[i]->run(); // Move this to a later stage, only here for testing
-				delete input[i];
+//				delete input[i];
 			} else {
 				std::cout << "Invalid type: " << type << std::endl;
 			}
@@ -174,6 +186,12 @@ int main (int argc, char *const argv[]){
 		std::cout << e.getPath() << " Was not found" << std::endl;
 	} catch(char const* e){
 		std::cout << e << std::endl;
+	} catch(libconfig::FileIOException e){
+		std::cout << "Libconfig error: " << e.what() << std::endl;
+	} catch(libconfig::SettingNameException e){
+		std::cout << "Libconfig error: " << e.what() << std::endl;
+	} catch(std::logic_error e){
+		std::cout << "Logic error: " << e.what() << std::endl;
 	} catch(CLuceneError e){
 		std::cout << "Clucene error: " << e.what() << std::endl;
 	}
@@ -181,7 +199,7 @@ int main (int argc, char *const argv[]){
 	
 	
 	
-	exit(0);
+	return 0;
 	
 	/*
 	// std::string timestamp = "2012-07-19T09:39:59+02:00";
